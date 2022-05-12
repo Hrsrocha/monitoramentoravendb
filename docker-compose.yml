@@ -1,0 +1,107 @@
+version: '3.6'
+services:
+  ravendb:
+    image: ravendb/ravendb:latest
+    container_name: ravendb
+    environment:
+      - RAVEN_Setup_Mode=None
+      - RAVEN_Security_UnsecuredAccessAllowed=PrivateNetwork
+      #LICENCIAMENTO
+      - RAVEN_License_Path=/opt/RavenDB/Config
+      - RAVEN_License_Eula_Accepted=true
+      - RAVEN_License_CanActivate=true
+      - RAVEN_License_CanForceUpdate=true
+      - RAVEN_License_CanRenewLicense=true
+      #LOGS
+      - RAVEN_Logs_Path=/opt/RavenDB/Server/RavenData/Storage/Logs
+      - RAVEN_Logs_Mode=Operations
+      - RAVEN_Logs_RetentionTimeInHrs=168
+      ##MONITORAMENTO
+      - RAVEN_Monitoring_Snmp_Port=161
+      - RAVEN_Monitoring_Snmp_SupportedVersions=V2C;V3
+      - RAVEN_Monitoring_Snmp_Community=ravendb
+      - RAVEN_Monitoring_Snmp_AuthenticationProtocol=SHA1
+      - RAVEN_Monitoring_Snmp_AuthenticationUser=ravendb
+      - RAVEN_Monitoring_Snmp_AuthenticationPassword=null
+      - RAVEN_Monitoring_Snmp_PrivacyProtocol=None
+      - RAVEN_Monitoring_Snmp_PrivacyPassword=ravendb
+      ##BACKUP
+      #- RAVEN_Backup_LocalRootPath=/opt/RavenDB/Server/Storage/RavenDataBackup
+      - RAVEN_Backup_AllowedDestinations=Local
+      - RAVEN_Backup_MaxNumberOfConcurrentBackups=1
+      - RAVEN_Backup_ConcurrentBackupsDelayInSec=15
+      - RAVEN_Backup_LowMemoryBackupDelayInMin=5
+      - RAVEN_DataDir=/opt/RavenDB/Server/Storage
+      ##INDEX
+      ## Configura o index para ser executado em disco
+      - RAVEN_Indexing_RunInMemory=false
+      # - CAP_NET_BIND_SERVICE=+eip /opt/RavenD 
+    ports:
+      - 38888:38888
+      - 9090:8080
+    volumes:
+      - ravendb_data:/opt/RavenDB/Server/
+    networks:
+      - db
+
+  telegraf:
+    image: telegraf
+    container_name: telegraf
+    restart: always
+    environment:
+      - DOCKER_INFLUXDB_INIT_ORG=henrique
+      - DOCKER_INFLUXDB_INIT_BUCKET=influx
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=VVaFPmTQ_izKTEKAh9Vbmeu-XjXoYwi5Vi0AbdZDcOqe7AiJh5Iev5Wo-gMRu96hyoPw5Lums6p3uBqlzhd8Bg==
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - influxdb
+      - ravendb
+    ports:
+      - 8125:8125
+    networks:
+      - monitor
+      - db
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    restart: always
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=Desenv@1234
+      - DOCKER_INFLUXDB_INIT_ORG=henrique
+      - DOCKER_INFLUXDB_INIT_BUCKET=influx
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=VVaFPmTQ_izKTEKAh9Vbmeu-XjXoYwi5Vi0AbdZDcOqe7AiJh5Iev5Wo-gMRu96hyoPw5Lums6p3uBqlzhd8Bg==
+    ports:
+      - 8086:8086
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+    networks:
+      - monitor
+  grafana:
+    image: grafana/grafana
+    container_name: grafana_server
+    restart: always
+    depends_on:
+      - influxdb
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=Desenv@1234
+      - GF_INSTALL_PLUGINS=
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - monitor
+volumes:
+  ravendb_data:
+    driver: local
+  grafana_data: {}
+  influxdb_data: {}
+networks:
+  db:
+    driver: bridge
+  monitor:
+    driver: bridge
