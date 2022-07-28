@@ -72,7 +72,7 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD=Desenv@1234
       - DOCKER_INFLUXDB_INIT_ORG=henrique
       - DOCKER_INFLUXDB_INIT_BUCKET=influx
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=VVaFPmTQ_izKTEKAh9Vbmeu-XjXoYwi5Vi0AbdZDcOqe7AiJh5Iev5Wo-gMRu96hyoPw5Lums6p3uBqlzhd8Bg==
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=ahgSQi4d4Me9PfuD8UXM14xiRPlYDXwYjbS7Yhyagj7qXmwxxNPgGNDqCZihjR-u05QFAxViatQimS6ibfp2VQ==
     ports:
       - 8086:8086
     volumes:
