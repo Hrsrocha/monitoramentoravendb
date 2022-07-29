@@ -1,0 +1,10 @@
+curl --request POST http://localhost:8086/api/v2/dbrps \
+  --header "Authorization: Token ahgSQi4d4Me9PfuD8UXM14xiRPlYDXwYjbS7Yhyagj7qXmwxxNPgGNDqCZihjR-u05QFAxViatQimS6ibfp2VQ==" \
+  --header 'Content-type: application/json' \
+  --data '{
+        "bucketID": "8f170b69fb042d07",
+        "database": "influx",
+        "default": true,
+        "orgID": "37aafc970aad10b3",
+        "retention_policy": "Forever"
+      }'
